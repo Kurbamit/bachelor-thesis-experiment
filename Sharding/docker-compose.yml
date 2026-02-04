@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  sharding-api:
+    image: sharding-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ~/.ssh/id_ed25519:/app/.ssh/id_ed25519:ro
+    environment:
+      - SshTunnel__PrivateKeyPath=/app/.ssh/id_ed25519
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_SECURITY_ADMIN_USER=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    restart: unless-stopped
+
+volumes:
+  grafana-data:

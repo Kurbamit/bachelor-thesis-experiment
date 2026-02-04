@@ -1,0 +1,6 @@
+@Sharding_HostAddress = http://localhost:5119
+
+GET {{Sharding_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

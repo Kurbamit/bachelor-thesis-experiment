@@ -1,0 +1,36 @@
+# HELP cart_repository_requests_total Total number of requests to CartRepository
+# TYPE cart_repository_requests_total counter
+cart_repository_requests_total{operation="get_by_id"} 4
+cart_repository_requests_total{operation="update_cart_item_quantity"} 1
+# HELP cart_repository_operation_duration_seconds Duration of CartRepository operations in seconds
+# TYPE cart_repository_operation_duration_seconds summary
+cart_repository_operation_duration_seconds_sum{operation="get_by_id"} 1.7897414
+cart_repository_operation_duration_seconds_count{operation="get_by_id"} 4
+cart_repository_operation_duration_seconds{operation="get_by_id",quantile="0.5"} 0.0577397
+cart_repository_operation_duration_seconds{operation="get_by_id",quantile="0.9"} 0.0577397
+cart_repository_operation_duration_seconds{operation="get_by_id",quantile="0.95"} 0.0577397
+cart_repository_operation_duration_seconds{operation="get_by_id",quantile="0.99"} 0.0577397
+cart_repository_operation_duration_seconds_sum{operation="update_cart_item_quantity"} 1.1103899
+cart_repository_operation_duration_seconds_count{operation="update_cart_item_quantity"} 1
+cart_repository_operation_duration_seconds{operation="update_cart_item_quantity",quantile="0.5"} 1.1103899
+cart_repository_operation_duration_seconds{operation="update_cart_item_quantity",quantile="0.9"} 1.1103899
+cart_repository_operation_duration_seconds{operation="update_cart_item_quantity",quantile="0.95"} 1.1103899
+cart_repository_operation_duration_seconds{operation="update_cart_item_quantity",quantile="0.99"} 1.1103899
+# HELP cart_repository_errors_total Total number of errors in CartRepository
+# TYPE cart_repository_errors_total counter
+# HELP cart_repository_active_operations Number of active CartRepository operations
+# TYPE cart_repository_active_operations gauge
+cart_repository_active_operations{operation="get_by_id"} 0
+cart_repository_active_operations{operation="update_cart_item_quantity"} 0
+# HELP cart_repository_rows_affected Number of rows affected by CartRepository operations
+# TYPE cart_repository_rows_affected histogram
+cart_repository_rows_affected_sum{operation="update_cart_item_quantity"} 2
+cart_repository_rows_affected_count{operation="update_cart_item_quantity"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="0"} 0
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="1"} 0
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="5"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="10"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="50"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="100"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="500"} 1
+cart_repository_rows_affected_bucket{operation="update_cart_item_quantity",le="+Inf"} 1
