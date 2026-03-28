@@ -1,0 +1,3943 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan">
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="dbUrl" elementType="Argument">
+            <stringProp name="Argument.name">dbUrl</stringProp>
+            <stringProp name="Argument.value">jdbc:postgresql://localhost:5433/appdb</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbUser" elementType="Argument">
+            <stringProp name="Argument.name">dbUser</stringProp>
+            <stringProp name="Argument.value">postgres</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbPassword" elementType="Argument">
+            <stringProp name="Argument.name">dbPassword</stringProp>
+            <stringProp name="Argument.value">postgres</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC Connection Configuration">
+        <boolProp name="autocommit">true</boolProp>
+        <stringProp name="checkQuery"></stringProp>
+        <stringProp name="connectionAge">5000</stringProp>
+        <stringProp name="dataSource">pg</stringProp>
+        <stringProp name="dbUrl">${dbUrl}</stringProp>
+        <stringProp name="driver">org.postgresql.Driver</stringProp>
+        <stringProp name="poolMax">200</stringProp>
+        <stringProp name="timeout">10000</stringProp>
+        <stringProp name="trimInterval">60000</stringProp>
+        <stringProp name="username">${dbUser}</stringProp>
+        <stringProp name="password">${dbPassword}</stringProp>
+        <stringProp name="transactionIsolation">DEFAULT</stringProp>
+        <boolProp name="preinit">false</boolProp>
+        <stringProp name="initQuery"></stringProp>
+        <boolProp name="keepAlive">true</boolProp>
+        <stringProp name="connectionProperties"></stringProp>
+      </JDBCDataSource>
+      <hashTree/>
+      <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+        <stringProp name="ConstantTimer.delay">200</stringProp>
+      </ConstantTimer>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Low (200)">
+        <intProp name="ThreadGroup.num_threads">200</intProp>
+        <intProp name="ThreadGroup.ramp_time">30</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Moderate (500)">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="High (1000)">
+        <intProp name="ThreadGroup.num_threads">1000</intProp>
+        <intProp name="ThreadGroup.ramp_time">90</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Very-high (2000)">
+        <intProp name="ThreadGroup.num_threads">2000</intProp>
+        <intProp name="ThreadGroup.ramp_time">120</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Extreme (5000)">
+        <intProp name="ThreadGroup.num_threads">5000</intProp>
+        <intProp name="ThreadGroup.ramp_time">150</intProp>
+        <longProp name="ThreadGroup.duration">600</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Moderate (500)">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Create Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW()) RETURNING cart_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;t_user_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartId = rs.getString(&quot;cart_id&quot;)
+        vars.put(&quot;cart_id&quot;, cartId)
+        SampleResult.setResponseMessage(&quot;Cart created: &quot; + cartId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to create cart&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Create Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (init)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Get Cart" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;SELECT c.cart_id FROM public.carts c &quot; +
+                 &quot;LEFT JOIN public.cart_items ci ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id &quot; +
+                 &quot;WHERE c.tenant_id = ?::uuid AND c.cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    int rowCount = 0
+    while (rs.next()) {
+        rowCount++
+    }
+    
+    SampleResult.setResponseMessage(&quot;Cart retrieved, rows: &quot; + rowCount)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Get Cart error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Update Quantity" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH updated AS ( &quot; +
+                 &quot;UPDATE public.cart_items SET quantity = ? &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM updated)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setInt(1, 2)
+    pstmt.setString(2, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(3, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_tenant_id&quot;))
+    
+    int updated = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Quantity updated, rows: &quot; + updated)
+    SampleResult.setSuccessful(updated &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Update Quantity error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 2" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Remove Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;WITH deleted AS ( &quot; +
+                 &quot;DELETE FROM public.cart_items &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_item_id = ?::uuid RETURNING cart_id) &quot; +
+                 &quot;UPDATE public.carts SET updated_at = NOW() &quot; +
+                 &quot;WHERE tenant_id = ?::uuid AND cart_id IN (SELECT cart_id FROM deleted)&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_item_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    
+    int deleted = pstmt.executeUpdate()
+    
+    SampleResult.setResponseMessage(&quot;Item removed, rows: &quot; + deleted)
+    SampleResult.setSuccessful(deleted &gt; 0)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Remove Item error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item 1" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Add Item" enabled="true">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">true</stringProp>
+              <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+import java.sql.ResultSet
+
+Connection conn = null
+PreparedStatement pstmt = null
+ResultSet rs = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at) &quot; +
+                 &quot;VALUES (?::uuid, gen_random_uuid(), ?::uuid, ?::uuid, ?::uuid, 1, NOW()) RETURNING cart_item_id&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_product_id&quot;))
+    pstmt.setString(4, vars.get(&quot;t_variant_id&quot;))
+    
+    rs = pstmt.executeQuery()
+    
+    if (rs.next()) {
+        String cartItemId = rs.getString(&quot;cart_item_id&quot;)
+        vars.put(&quot;cart_item_id&quot;, cartItemId)
+        SampleResult.setResponseMessage(&quot;Item added: &quot; + cartItemId)
+        SampleResult.setSuccessful(true)
+    } else {
+        SampleResult.setResponseMessage(&quot;Failed to add item&quot;)
+        SampleResult.setSuccessful(false)
+    }
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Add Item error&quot;, e)
+} finally {
+    if (rs != null) rs.close()
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Delete Cart" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">true</stringProp>
+            <stringProp name="script">import java.sql.Connection
+import java.sql.PreparedStatement
+
+Connection conn = null
+PreparedStatement pstmt = null
+
+try {
+    conn = org.apache.jmeter.protocol.jdbc.config.DataSourceElement.getConnection(&quot;pg&quot;)
+    
+    String sql = &quot;DELETE FROM public.cart_items WHERE tenant_id = ?::uuid AND cart_id = ?::uuid; &quot; +
+                 &quot;DELETE FROM public.carts WHERE tenant_id = ?::uuid AND cart_id = ?::uuid&quot;
+    
+    pstmt = conn.prepareStatement(sql)
+    pstmt.setString(1, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(2, vars.get(&quot;cart_id&quot;))
+    pstmt.setString(3, vars.get(&quot;t_tenant_id&quot;))
+    pstmt.setString(4, vars.get(&quot;cart_id&quot;))
+    
+    pstmt.execute()
+    
+    SampleResult.setResponseMessage(&quot;Cart deleted&quot;)
+    SampleResult.setSuccessful(true)
+} catch (Exception e) {
+    SampleResult.setResponseMessage(&quot;Error: &quot; + e.getMessage())
+    SampleResult.setSuccessful(false)
+    log.error(&quot;Delete Cart error&quot;, e)
+} finally {
+    if (pstmt != null) pstmt.close()
+    if (conn != null) conn.close()
+}</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="false">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/groovy-2026-02-16/results.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>

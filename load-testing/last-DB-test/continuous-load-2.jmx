@@ -1,0 +1,2457 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmeterTestPlan version="1.2" properties="5.0" jmeter="5.6.3">
+  <hashTree>
+    <TestPlan guiclass="TestPlanGui" testclass="TestPlan" testname="Test Plan">
+      <boolProp name="TestPlan.serialize_threadgroups">true</boolProp>
+      <elementProp name="TestPlan.user_defined_variables" elementType="Arguments" guiclass="ArgumentsPanel" testclass="Arguments" testname="User Defined Variables">
+        <collectionProp name="Arguments.arguments">
+          <elementProp name="dbUrl" elementType="Argument">
+            <stringProp name="Argument.name">dbUrl</stringProp>
+            <stringProp name="Argument.value">jdbc:postgresql://localhost:5433/appdb</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbUser" elementType="Argument">
+            <stringProp name="Argument.name">dbUser</stringProp>
+            <stringProp name="Argument.value">postgres</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+          <elementProp name="dbPassword" elementType="Argument">
+            <stringProp name="Argument.name">dbPassword</stringProp>
+            <stringProp name="Argument.value">postgres</stringProp>
+            <stringProp name="Argument.metadata">=</stringProp>
+          </elementProp>
+        </collectionProp>
+      </elementProp>
+      <boolProp name="TestPlan.functional_mode">false</boolProp>
+    </TestPlan>
+    <hashTree>
+      <JDBCDataSource guiclass="TestBeanGUI" testclass="JDBCDataSource" testname="JDBC Connection Configuration">
+        <boolProp name="autocommit">true</boolProp>
+        <stringProp name="checkQuery"></stringProp>
+        <stringProp name="connectionAge">5000</stringProp>
+        <stringProp name="dataSource">pg</stringProp>
+        <stringProp name="dbUrl">${dbUrl}</stringProp>
+        <stringProp name="driver">org.postgresql.Driver</stringProp>
+        <stringProp name="poolMax">50</stringProp>
+        <stringProp name="timeout">10000</stringProp>
+        <stringProp name="trimInterval">60000</stringProp>
+        <stringProp name="username">${dbUser}</stringProp>
+        <stringProp name="password">${dbPassword}</stringProp>
+        <stringProp name="transactionIsolation">DEFAULT</stringProp>
+        <boolProp name="preinit">false</boolProp>
+        <stringProp name="initQuery"></stringProp>
+        <boolProp name="keepAlive">true</boolProp>
+        <stringProp name="connectionProperties"></stringProp>
+      </JDBCDataSource>
+      <hashTree/>
+      <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+        <stringProp name="ConstantTimer.delay">200</stringProp>
+      </ConstantTimer>
+      <hashTree/>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Moderate load (500)" enabled="false">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="false">
+          <stringProp name="filename">Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">utf-8</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.thread</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+        </CSVDataSet>
+        <hashTree/>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Create Cart" enabled="true"/>
+        <hashTree>
+          <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+            <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+            <stringProp name="fileEncoding">UTF-8</stringProp>
+            <stringProp name="delimiter">,</stringProp>
+            <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+            <boolProp name="randomOrder">true</boolProp>
+            <boolProp name="ignoreFirstLine">true</boolProp>
+            <boolProp name="rewindOnTheEndOfList">true</boolProp>
+            <boolProp name="independentListPerThread">false</boolProp>
+          </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_id" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (seed)" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item (seed)" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW());</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Main Loop" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Delete Cart" enabled="true"/>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="High load (2000)" enabled="false">
+        <intProp name="ThreadGroup.num_threads">2000</intProp>
+        <intProp name="ThreadGroup.ramp_time">100</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="false">
+          <stringProp name="filename">Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">utf-8</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.thread</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+        </CSVDataSet>
+        <hashTree/>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Create Cart" enabled="true"/>
+        <hashTree>
+          <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+            <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+            <stringProp name="fileEncoding">UTF-8</stringProp>
+            <stringProp name="delimiter">,</stringProp>
+            <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+            <boolProp name="randomOrder">true</boolProp>
+            <boolProp name="ignoreFirstLine">true</boolProp>
+            <boolProp name="rewindOnTheEndOfList">true</boolProp>
+            <boolProp name="independentListPerThread">false</boolProp>
+          </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_id" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (seed)" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item (seed)" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW());</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Main Loop" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Delete Cart" enabled="true"/>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Moderate load (500)" enabled="false">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <CSVDataSet guiclass="TestBeanGUI" testclass="CSVDataSet" testname="CSV Data Set Config" enabled="false">
+          <stringProp name="filename">Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">utf-8</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <boolProp name="quotedData">false</boolProp>
+          <boolProp name="recycle">true</boolProp>
+          <boolProp name="stopThread">false</boolProp>
+          <stringProp name="shareMode">shareMode.thread</stringProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+        </CSVDataSet>
+        <hashTree/>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Create Cart" enabled="true"/>
+        <hashTree>
+          <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+            <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+            <stringProp name="fileEncoding">UTF-8</stringProp>
+            <stringProp name="delimiter">,</stringProp>
+            <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+            <boolProp name="randomOrder">true</boolProp>
+            <boolProp name="ignoreFirstLine">true</boolProp>
+            <boolProp name="rewindOnTheEndOfList">true</boolProp>
+            <boolProp name="independentListPerThread">false</boolProp>
+          </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+          <hashTree/>
+          <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223PreProcessor>
+          <hashTree/>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_id" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (seed)" enabled="false">
+            <stringProp name="scriptLanguage">groovy</stringProp>
+            <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+            <stringProp name="parameters"></stringProp>
+            <stringProp name="filename"></stringProp>
+            <stringProp name="cacheKey">false</stringProp>
+          </JSR223Sampler>
+          <hashTree/>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item (seed)" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW());</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Main Loop" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+        </hashTree>
+        <OnceOnlyController guiclass="OnceOnlyControllerGui" testclass="OnceOnlyController" testname="Once Only - Delete Cart" enabled="true"/>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Low load (500)">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Moderate load (1000)" enabled="false">
+        <intProp name="ThreadGroup.num_threads">1000</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="High load (2000)">
+        <intProp name="ThreadGroup.num_threads">2000</intProp>
+        <intProp name="ThreadGroup.ramp_time">100</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="Low load (500)" enabled="true">
+        <intProp name="ThreadGroup.num_threads">500</intProp>
+        <intProp name="ThreadGroup.ramp_time">60</intProp>
+        <longProp name="ThreadGroup.duration">300</longProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller">
+          <stringProp name="LoopController.loops">1</stringProp>
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+        </elementProp>
+      </ThreadGroup>
+      <hashTree>
+        <com.blazemeter.jmeter.RandomCSVDataSetConfig guiclass="com.blazemeter.jmeter.RandomCSVDataSetConfigGui" testclass="com.blazemeter.jmeter.RandomCSVDataSetConfig" testname="bzm - Random CSV Data Set Config" enabled="true">
+          <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/FK-API-test/data.csv</stringProp>
+          <stringProp name="fileEncoding">UTF-8</stringProp>
+          <stringProp name="delimiter">,</stringProp>
+          <stringProp name="variableNames">tenant_id,unused_cart_id,user_id,product_id,variant_id</stringProp>
+          <boolProp name="randomOrder">true</boolProp>
+          <boolProp name="ignoreFirstLine">true</boolProp>
+          <boolProp name="rewindOnTheEndOfList">true</boolProp>
+          <boolProp name="independentListPerThread">false</boolProp>
+        </com.blazemeter.jmeter.RandomCSVDataSetConfig>
+        <hashTree/>
+        <JSR223PreProcessor guiclass="TestBeanGUI" testclass="JSR223PreProcessor" testname="Freeze CSV Vars" enabled="true">
+          <stringProp name="scriptLanguage">groovy</stringProp>
+          <stringProp name="script">vars.put(&apos;t_tenant_id&apos;, vars.get(&apos;tenant_id&apos;))
+vars.put(&apos;t_user_id&apos;, vars.get(&apos;user_id&apos;))
+vars.put(&apos;t_product_id&apos;, vars.get(&apos;product_id&apos;))
+vars.put(&apos;t_variant_id&apos;, vars.get(&apos;variant_id&apos;))</stringProp>
+          <stringProp name="parameters"></stringProp>
+          <stringProp name="filename"></stringProp>
+          <stringProp name="cacheKey">false</stringProp>
+        </JSR223PreProcessor>
+        <hashTree/>
+        <GaussianRandomTimer guiclass="GaussianRandomTimerGui" testclass="GaussianRandomTimer" testname="Gaussian Random Timer" enabled="true">
+          <stringProp name="ConstantTimer.delay">200</stringProp>
+          <stringProp name="RandomTimer.range">50</stringProp>
+        </GaussianRandomTimer>
+        <hashTree/>
+        <LoopController guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <intProp name="LoopController.loops">-1</intProp>
+        </LoopController>
+        <hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Create Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Select Statement</stringProp>
+            <stringProp name="query">INSERT INTO public.carts (tenant_id, cart_id, user_id, discount_id, created_at, updated_at)
+VALUES (?::uuid, gen_random_uuid(), ?::uuid, NULL, NOW(), NOW())
+RETURNING cart_id;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_user_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree>
+            <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_id" enabled="true">
+              <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+              <stringProp name="RegexExtractor.refname">cart_id</stringProp>
+              <stringProp name="RegexExtractor.regex">cart_id\s*\n([a-f0-9\-]+)</stringProp>
+              <stringProp name="RegexExtractor.template">$1$</stringProp>
+              <stringProp name="RegexExtractor.default">cart_id_not_found</stringProp>
+              <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+              <stringProp name="RegexExtractor.match_number">1</stringProp>
+            </RegexExtractor>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="GET Cart (70%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">70</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Get Cart" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">SELECT c.cart_id
+FROM public.carts c
+LEFT JOIN public.cart_items ci
+  ON c.cart_id = ci.cart_id AND c.tenant_id = ci.tenant_id
+WHERE c.tenant_id = ?::uuid
+  AND c.cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Add Item (15%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">15</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JSR223Sampler guiclass="TestBeanGUI" testclass="JSR223Sampler" testname="Generate cart_item_id (loop)" enabled="false">
+              <stringProp name="scriptLanguage">groovy</stringProp>
+              <stringProp name="script">vars.put(&apos;cart_item_id&apos;, java.util.UUID.randomUUID().toString())</stringProp>
+              <stringProp name="parameters"></stringProp>
+              <stringProp name="filename"></stringProp>
+              <stringProp name="cacheKey">false</stringProp>
+            </JSR223Sampler>
+            <hashTree/>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Add Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Select Statement</stringProp>
+              <stringProp name="query">INSERT INTO public.cart_items (tenant_id, cart_item_id, cart_id, product_id, variant_id, quantity, created_at)
+VALUES (?::uuid, gen_random_uuid(), &apos;${cart_id}&apos;::uuid, ?::uuid, ?::uuid, 1, NOW())
+RETURNING cart_item_id;</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_product_id},${t_variant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree>
+              <RegexExtractor guiclass="RegexExtractorGui" testclass="RegexExtractor" testname="Extract cart_item_id" enabled="true">
+                <stringProp name="RegexExtractor.useHeaders">false</stringProp>
+                <stringProp name="RegexExtractor.refname">cart_item_id</stringProp>
+                <stringProp name="RegexExtractor.regex">cart_item_id\s*\n([a-f0-9\-]+)</stringProp>
+                <stringProp name="RegexExtractor.template">$1$</stringProp>
+                <stringProp name="RegexExtractor.default">cart_item_id_not_found</stringProp>
+                <boolProp name="RegexExtractor.default_empty_value">false</boolProp>
+                <stringProp name="RegexExtractor.match_number">1</stringProp>
+              </RegexExtractor>
+              <hashTree/>
+            </hashTree>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Update Quantity (10%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">10</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Update Quantity" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH updated AS (
+  UPDATE public.cart_items
+  SET quantity = ?
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM updated);</stringProp>
+              <stringProp name="queryArguments">2,${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">INTEGER,VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Remove Item (5%)" enabled="true">
+            <intProp name="ThroughputController.style">1</intProp>
+            <boolProp name="ThroughputController.perThread">true</boolProp>
+            <intProp name="ThroughputController.maxThroughput">1</intProp>
+            <FloatProperty>
+              <name>ThroughputController.percentThroughput</name>
+              <value>100.0</value>
+              <savedValue>0.0</savedValue>
+            </FloatProperty>
+            <intProp name="ThroughputController.percentage">5</intProp>
+          </ThroughputController>
+          <hashTree>
+            <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Remove Item" enabled="true">
+              <stringProp name="dataSource">pg</stringProp>
+              <stringProp name="queryType">Prepared Update Statement</stringProp>
+              <stringProp name="query">WITH deleted AS (
+  DELETE FROM public.cart_items
+  WHERE tenant_id = ?::uuid
+    AND cart_item_id = &apos;${cart_item_id}&apos;::uuid
+  RETURNING cart_id
+)
+UPDATE public.carts
+SET updated_at = NOW()
+WHERE tenant_id = ?::uuid
+  AND cart_id IN (SELECT cart_id FROM deleted);</stringProp>
+              <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+              <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+              <stringProp name="variableNames"></stringProp>
+              <stringProp name="resultVariable"></stringProp>
+              <stringProp name="queryTimeout"></stringProp>
+              <stringProp name="resultSetMaxRows"></stringProp>
+              <stringProp name="resultSetHandler">Store as String</stringProp>
+            </JDBCSampler>
+            <hashTree/>
+          </hashTree>
+          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Delete Cart" enabled="true">
+            <stringProp name="dataSource">pg</stringProp>
+            <stringProp name="queryType">Prepared Update Statement</stringProp>
+            <stringProp name="query">DELETE FROM public.cart_items
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;
+
+DELETE FROM public.carts
+WHERE tenant_id = ?::uuid
+  AND cart_id = &apos;${cart_id}&apos;::uuid;</stringProp>
+            <stringProp name="queryArguments">${t_tenant_id},${t_tenant_id}</stringProp>
+            <stringProp name="queryArgumentsTypes">VARCHAR,VARCHAR</stringProp>
+            <stringProp name="variableNames"></stringProp>
+            <stringProp name="resultVariable"></stringProp>
+            <stringProp name="queryTimeout"></stringProp>
+            <stringProp name="resultSetMaxRows"></stringProp>
+            <stringProp name="resultSetHandler">Store as String</stringProp>
+          </JDBCSampler>
+          <hashTree/>
+        </hashTree>
+        <ResultCollector guiclass="ViewResultsFullVisualizer" testclass="ResultCollector" testname="View Results Tree" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+        <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+          <boolProp name="ResultCollector.error_logging">false</boolProp>
+          <objProp>
+            <name>saveConfig</name>
+            <value class="SampleSaveConfiguration">
+              <time>true</time>
+              <latency>true</latency>
+              <timestamp>true</timestamp>
+              <success>true</success>
+              <label>true</label>
+              <code>true</code>
+              <message>true</message>
+              <threadName>true</threadName>
+              <dataType>true</dataType>
+              <encoding>false</encoding>
+              <assertions>true</assertions>
+              <subresults>true</subresults>
+              <responseData>false</responseData>
+              <samplerData>false</samplerData>
+              <xml>false</xml>
+              <fieldNames>true</fieldNames>
+              <responseHeaders>false</responseHeaders>
+              <requestHeaders>false</requestHeaders>
+              <responseDataOnError>false</responseDataOnError>
+              <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+              <assertionsResultsToSave>0</assertionsResultsToSave>
+              <bytes>true</bytes>
+              <sentBytes>true</sentBytes>
+              <url>true</url>
+              <threadCounts>true</threadCounts>
+              <idleTime>true</idleTime>
+              <connectTime>true</connectTime>
+            </value>
+          </objProp>
+          <stringProp name="filename"></stringProp>
+        </ResultCollector>
+        <hashTree/>
+      </hashTree>
+      <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename"></stringProp>
+      </ResultCollector>
+      <hashTree/>
+      <ResultCollector guiclass="SimpleDataWriter" testclass="ResultCollector" testname="Simple Data Writer" enabled="true">
+        <boolProp name="ResultCollector.error_logging">false</boolProp>
+        <objProp>
+          <name>saveConfig</name>
+          <value class="SampleSaveConfiguration">
+            <time>true</time>
+            <latency>true</latency>
+            <timestamp>true</timestamp>
+            <success>true</success>
+            <label>true</label>
+            <code>true</code>
+            <message>true</message>
+            <threadName>true</threadName>
+            <dataType>true</dataType>
+            <encoding>false</encoding>
+            <assertions>true</assertions>
+            <subresults>true</subresults>
+            <responseData>false</responseData>
+            <samplerData>false</samplerData>
+            <xml>false</xml>
+            <fieldNames>true</fieldNames>
+            <responseHeaders>false</responseHeaders>
+            <requestHeaders>false</requestHeaders>
+            <responseDataOnError>false</responseDataOnError>
+            <saveAssertionResultsFailureMessage>true</saveAssertionResultsFailureMessage>
+            <assertionsResultsToSave>0</assertionsResultsToSave>
+            <bytes>true</bytes>
+            <sentBytes>true</sentBytes>
+            <url>true</url>
+            <threadCounts>true</threadCounts>
+            <idleTime>true</idleTime>
+            <connectTime>true</connectTime>
+          </value>
+        </objProp>
+        <stringProp name="filename">/Users/dominykas.cernovas/Documents/Vilnius University/4_year/kursinis_darbas/eksperimentas/Sharding/load-testing/last-DB-test/continuos_load-2.jtl</stringProp>
+      </ResultCollector>
+      <hashTree/>
+    </hashTree>
+  </hashTree>
+</jmeterTestPlan>
