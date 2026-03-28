@@ -1,0 +1,96 @@
+services:
+  citus_coordinator_ram:
+    image: citusdata/citus:12.1
+    container_name: citus_coordinator_ram
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    ports:
+      - "55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data:rw,size=4g
+    command:
+      - postgres
+      - -c
+      - listen_addresses=*
+      - -c
+      - wal_level=logical
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+      - -c
+      - max_connections=300
+      - -c
+      - shared_buffers=1GB
+      - -c
+      - work_mem=2MB
+      - -c
+      - max_prepared_transactions=300
+
+  citus_worker_1_ram:
+    image: citusdata/citus:12.1
+    container_name: citus_worker_1_ram
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    tmpfs:
+      - /var/lib/postgresql/data:rw,size=3g
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+      - -c
+      - max_connections=300
+      - -c
+      - shared_buffers=768MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - max_prepared_transactions=300
+    depends_on:
+      - citus_coordinator_ram
+    ports:
+      - "55433:5432"
+
+  citus_worker_2_ram:
+    image: citusdata/citus:12.1
+    container_name: citus_worker_2_ram
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    tmpfs:
+      - /var/lib/postgresql/data:rw,size=3g
+    command:
+      - postgres
+      - -c
+      - wal_level=logical
+      - -c
+      - fsync=off
+      - -c
+      - synchronous_commit=off
+      - -c
+      - full_page_writes=off
+      - -c
+      - max_connections=300
+      - -c
+      - shared_buffers=768MB
+      - -c
+      - work_mem=2MB
+      - -c
+      - max_prepared_transactions=300
+    depends_on:
+      - citus_coordinator_ram
+    ports:
+      - "55434:5432"

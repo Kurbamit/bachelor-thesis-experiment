@@ -275,11 +275,14 @@ public sealed class CartRepository(DbConnectionFactory db)
         try
         {
             const string sql = """
-                                   UPDATE public.carts 
-                                   SET updated_at = @Now 
-                                   WHERE cart_id = (SELECT cart_id FROM public.cart_items WHERE cart_item_id = @CartItemId);
-                                   
-                                   DELETE FROM public.cart_items WHERE cart_item_id = @CartItemId;
+                                   WITH deleted AS (
+                                       DELETE FROM public.cart_items
+                                       WHERE cart_item_id = @CartItemId
+                                       RETURNING cart_id
+                                   )
+                                   UPDATE public.carts
+                                   SET updated_at = @Now
+                                   WHERE cart_id IN (SELECT cart_id FROM deleted);
                                """;
 
             using var conn = db.Create();

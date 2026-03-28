@@ -1,0 +1,119 @@
+services:
+  # --- Citus cluster (vienoje VM, keli konteineriai) ---
+  citus_coordinator:
+    image: citusdata/citus:12.1
+    container_name: citus_coordinator
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - citus_coordinator_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "wal_level=logical"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  citus_worker_1:
+    image: citusdata/citus:12.1
+    container_name: citus_worker_1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    volumes:
+      - citus_worker_1_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "wal_level=logical"]
+    depends_on:
+      - citus_coordinator
+
+  citus_worker_2:
+    image: citusdata/citus:12.1
+    container_name: citus_worker_2
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: appdb
+    volumes:
+      - citus_worker_2_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "wal_level=logical"]
+    depends_on:
+      - citus_coordinator
+
+  # --- Postgres exporter (metrikoms iš DB) ---
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    container_name: postgres_exporter
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:postgres@citus_coordinator:5432/appdb?sslmode=disable"
+    ports:
+      - "9187:9187"
+    depends_on:
+      citus_coordinator:
+        condition: service_healthy
+
+  # --- Node exporter (host metrikoms) ---
+  node_exporter:
+    image: prom/node-exporter:v1.8.2
+    container_name: node_exporter
+    restart: unless-stopped
+    ports:
+      - "9100:9100"
+    command:
+      - '--path.rootfs=/host'
+    volumes:
+      - /:/host:ro,rslave
+
+  # --- cAdvisor (konteinerių CPU/RAM/IO metrikoms) ---
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.49.2
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  # --- Prometheus ---
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=15d'
+    depends_on:
+      - postgres_exporter
+      - cadvisor
+
+  # --- Grafana ---
+  grafana:
+    image: grafana/grafana:11.1.4
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    depends_on:
+      - prometheus
+
+volumes:
+  citus_coordinator_data:
+  citus_worker_1_data:
+  citus_worker_2_data:
+  prometheus_data:
+  grafana_data:

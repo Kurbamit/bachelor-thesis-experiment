@@ -21,7 +21,7 @@ builder.Services.AddSingleton(sp =>
     var user = pg["Username"];
     var pass = pg["Password"];
 
-    return $"Host=127.0.0.1;Port={sshOpt.LocalPort};Database={db};Username={user};Password={pass};Pooling=true;Timeout=15;Command Timeout=30;";
+    return $"Host=127.0.0.1;Port={sshOpt.LocalPort};Database={db};Username={user};Password={pass};Pooling=true;Maximum Pool Size=200;Minimum Pool Size=0;Timeout=90;Command Timeout=90;";
 });
 
 builder.Services.AddSingleton(sp =>
@@ -30,7 +30,7 @@ builder.Services.AddSingleton(sp =>
     var ssh = sp.GetRequiredService<IOptions<SshTunnelOptions>>().Value;
 
     var cs =
-        $"Host=127.0.0.1;Port={ssh.LocalPort};Database={pg.Database};Username={pg.Username};Password={pg.Password};Pooling=true;Timeout=15;Command Timeout=30;";
+        $"Host=127.0.0.1;Port={ssh.LocalPort};Database={pg.Database};Username={pg.Username};Password={pg.Password};Pooling=true;Maximum Pool Size=200;Minimum Pool Size=0;Timeout=90;Command Timeout=90;";
 
     return new DbConnectionFactory(cs);
 });
@@ -38,6 +38,7 @@ builder.Services.AddSingleton(sp =>
 // Repositories DI
 builder.Services.AddScoped<ProductRepository>();
 builder.Services.AddScoped<CartRepository>();
+builder.Services.AddScoped<CartTenantRepository>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

@@ -10,11 +10,8 @@ services:
     environment:
       - SshTunnel__PrivateKeyPath=/app/.ssh/id_ed25519
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: "2.0"
-          memory: 2G
+    cpus: "4.0"
+    mem_limit: 2g
 
   grafana:
     image: grafana/grafana:latest

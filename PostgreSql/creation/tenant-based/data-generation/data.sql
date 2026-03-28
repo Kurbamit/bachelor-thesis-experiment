@@ -1,7 +1,8 @@
 -- Test Data for Multi-Tenant E-commerce System
 -- Generated: 2026-02-03 14:48:44.863081
 -- Tenants: 10, Users per tenant: 1000
--- Products per tenant: 500, Carts per tenant: 300
+-- Products per tenant: 500, Carts per tenant: 300, Cart-items per tenant: ~1500, 
+-- Discounts per tenant: 20, Product variants per tenant: ~1500, 
 
 -- ===== TENANTS =====
 INSERT INTO public.tenants (tenant_id, name) VALUES
