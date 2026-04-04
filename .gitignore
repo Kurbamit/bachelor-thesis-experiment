@@ -1,5 +1,32 @@
+# Build results
+bin/
+obj/
+out/
+
+# .NET
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+[Bb]uild/
+[Ll]og/
+[Ll]ogs/
+
+# IDE
+.idea/
+.vs/
+*.swp
+*.swo
+.DS_Store
+
+# Test results
+*.jtl
 *.csv
 *.log
-*.idea
-.DS_Store
-*.jtl
+results/
+data/
+
+# Gradle (if used)
+.gradle/
