@@ -2,143 +2,128 @@
 
 ## Overview
 
-The system consists of three main layers:
+The experiment compares two database systems under identical in-memory conditions:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
 │                        Load Testing Layer                        │
-│                    (Apache JMeter + Prometheus)                  │
+│              Apache JMeter 5.6.3 + Groovy (JSR223 Sampler)       │
+│                   Direct database access (no API)                │
 └─────────────────────────────────────────────────────────────────┘
-                                 │
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         API Layer                               │
-│              ASP.NET Core Web API + Prometheus                  │
-│                     (Sharding.Api)                              │
-└─────────────────────────────────────────────────────────────────┘
-                                 │
-                    ┌────────────┴────────────┐
                     │                         │
                     ▼                         ▼
-┌───────────────────────────┐   ┌───────────────────────────────┐
-│      SSH Tunnel           │   │      Direct Connection        │
-│  (Remote Database)       │   │    (Local Docker Cluster)     │
-└───────────────────────────┘   └───────────────────────────────┘
-                    │                         │
-                    └────────────┬────────────┘
-                                 ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                     Database Layer                              │
-│              PostgreSQL + Citus Extension                       │
-│   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │
-│   │ Coordinator │────│   Worker 1   │────│   Worker 2   │     │
-│   │   (Citus)   │    │   (Citus)   │    │   (Citus)   │     │
-│   └─────────────┘    └─────────────┘    └─────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────┐   ┌───────────────────────────────┐
+│   PostgreSQL + Citus 12.1    │   │       Redis 8.6 Cluster        │
+│                               │   │                               │
+│  ┌─────────────┐              │   │  ┌─────┐ ┌─────┐ ┌─────┐     │
+│  │ Coordinator │              │   │  │ P1  │ │ P2  │ │ P3  │     │
+│  │   (55432)   │              │   │  └─────┘ └─────┘ └─────┘     │
+│  └──────┬──────┘              │   │  ┌─────┐ ┌─────┐ ┌─────┐     │
+│         │                     │   │  │ R1  │ │ R2  │ │ R3  │     │
+│  ┌──────┴──────┐              │   │  └─────┘ └─────┘ └─────┘     │
+│  │   Worker 1  │              │   │    Ports 7001-7006            │
+│  │   (55433)   │              │   │                               │
+│  └─────────────┘              │   │    Hash-slot sharding         │
+│  ┌─────────────┐              │   │    3 primary + 3 replica      │
+│  │   Worker 2  │              │   │                               │
+│  │   (55434)   │              │   │    In-memory (RAM)             │
+│  └─────────────┘              │   │                               │
+│         RAM-backed            │   │    In-memory (RAM)             │
+└───────────────────────────────┘   └───────────────────────────────┘
 ```
+
+## Key Architectural Difference
+
+> **Note:** An initial API prototype (ASP.NET Core) was built but abandoned during testing. At loads above 1,000 concurrent threads, the API became a bottleneck, leaving database resources underutilised. Final tests use **direct database access via JMeter Groovy scripts** for both systems, ensuring a fair comparison.
 
 ## Components
 
-### API Layer (`src/Api`)
-
-The ASP.NET Core Web API provides REST endpoints for shopping cart operations.
-
-**Key Components:**
-- `Controllers/Postgres/CartController.cs` - Non-tenant cart operations
-- `Controllers/Postgres/CartTenantController.cs` - Tenant-scoped cart operations
-- `Controllers/Postgres/ProductController.cs` - Product read operations
-- `Repositories/Postgres/CartRepository.cs` - Cart data access with Prometheus metrics
-- `Services/Postgres/DbConnectionFactory.cs` - Npgsql connection factory
-- `Services/SshTunnelService.cs` - SSH tunnel management as BackgroundService
-
-**Configuration:**
-- `appsettings.json` - SSH tunnel and database configuration
-- `prometheus.yml` - Prometheus scrape configuration
-
 ### Database Layer
 
-**Citus Cluster (docker-compose.postgres.yml):**
-- 1 Coordinator node (port 55432)
-- 2 Worker nodes (ports 55433, 55434)
-- tmpfs storage for performance testing
-- Optimized PostgreSQL settings (fsync=off, synchronous_commit=off)
+#### PostgreSQL + Citus Cluster (`infrastructure/docker-compose.postgres.yml`)
 
-**Redis Cluster (docker-compose.redis.yml):**
-- 6 Redis nodes (ports 7001-7006)
-- Cluster mode enabled
-- Used for comparison benchmarking
+- **1 Coordinator node** (port 55432) - receives queries, distributes to workers
+- **2 Worker nodes** (ports 55433, 55434) - store actual data shards
+- **Storage:** tmpfs (RAM-backed) for all nodes
+- **Configuration:** UNLOGGED tables, fsync=off, synchronous_commit=off
 
-### Monitoring Layer
+**Tables distributed by `tenant_id`:**
+- `tenants` - reference table (replicated to all workers)
+- `users` - distributed
+- `products` - distributed
+- `product_variants` - distributed
+- `discounts` - distributed
+- `carts` - distributed
+- `cart_items` - distributed
 
-**Prometheus Metrics:**
-- Exposed at `/metrics` endpoint
-- Custom metrics for cart repository operations
-- Latency percentiles (p50, p90, p95, p99)
-- Error rates by operation type
+#### Redis Cluster (`infrastructure/docker-compose.redis.yml`)
 
-**Grafana Dashboards:**
-- Located in `infrastructure/grafana/`
-- JSON dashboard for Citus metrics visualization
+- **6 nodes:** ports 7001-7006
+- **3 primary + 3 replica** topology
+- **Hash-slot sharding** (16,384 slots distributed across primaries)
+- **Storage:** All data in RAM (appendonly disabled for pure RAM operation)
+
+**Data structure:** Each cart stored as a single JSON object per key (e.g., `cart:{cartId}`)
+
+### Load Testing Layer
+
+#### JMeter Configuration
+
+- **Version:** 5.6.3
+- **Scripts:** Groovy (JSR223 Sampler) with compilation cache enabled
+- **Mode:** Direct database connection (no HTTP/API layer)
+- **PostgreSQL:** JDBC connection via Npgsql
+- **Redis:** Jedis client library
+
+#### Test Scenario (per virtual user)
+
+1. Create cart
+2. Add item
+3. Add second item
+4. Update item quantity
+5. Remove item
+6. View cart contents
+7. Checkout (delete cart)
 
 ## Data Flow
 
-### Non-Tenant Request Flow
+### PostgreSQL Flow
 
 ```
-Client → CartController.Get(cartId)
-       → CartRepository.GetByIdAsync(cartId)
-       → DbConnectionFactory (via SSH tunnel or direct)
-       → Citus Coordinator → Worker(s)
+JMeter (Groovy) → JDBC/Npgsql → Citus Coordinator → Worker(s)
+                 ↓
+        All queries include tenant_id for shard routing
 ```
 
-### Tenant-Scoped Request Flow
+### Redis Flow
 
 ```
-Client → CartTenantController.Get(tenantId, cartId)
-       → CartTenantRepository.GetByTenantAsync(tenantId, cartId)
-       → DbConnectionFactory
-       → Citus Coordinator (routes to correct shard by tenant_id)
-       → Worker (specific shard containing tenant data)
+JMeter (Groovy) → Jedis → Redis Cluster
+                  ↓
+         Hash-slot calculation from cart key
+                  ↓
+         Primary node (auto-failover to replica)
 ```
 
-## Sharding Strategies
+## Sharding Comparison
 
-### 1. Simple Sharding (Entity-Based)
+| Aspect | PostgreSQL + Citus | Redis Cluster |
+|--------|-------------------|---------------|
+| Shard key | `tenant_id` (composite PK) | Cart ID (hash slot) |
+| Co-location | All tenant data on same shard | By hash slot |
+| Reference tables | Replicated to all workers | N/A |
+| Cross-shard queries | Coordinator scatter-gather | Multi-key operations |
+| Consistency | ACID (100% guaranteed) | BASE (eventual) |
 
-Tables distributed by their own primary keys:
+## Infrastructure
 
-```sql
-SELECT create_distributed_table('users', 'user_id');
-SELECT create_distributed_table('products', 'product_id');
-SELECT create_distributed_table('cart', 'user_id');
-```
+All experiments were run on a single VM provided by **Vilnius University MIF via OpenNebula**:
 
-**Pros:** Simple to implement
-**Cons:** Cross-entity queries require scatter-gather, no data co-location
+| Spec | Value |
+|------|-------|
+| CPU | 2 vCPU |
+| RAM | 10 GB |
+| Disk | 100 GB |
+| OS | Ubuntu 24.04 LTS |
 
-### 2. Tenant-Based Sharding
-
-All tenant-scoped data distributed by `tenant_id`:
-
-```sql
-SELECT create_distributed_table('users', 'tenant_id');
-SELECT create_distributed_table('products', 'tenant_id');
-SELECT create_distributed_table('cart', 'tenant_id');
-```
-
-**Pros:** All data for a tenant on same shard, optimal for multi-tenant apps
-**Cons:** Requires composite primary keys including tenant_id
-
-## Connection Architecture
-
-### Local Development
-
-```
-API → localhost:5433 → Citus Coordinator → Workers
-```
-
-### Remote Deployment
-
-```
-API → SSH Tunnel (193.219.91.103:11200) → Remote PostgreSQL → Citus Coordinator
-```
+Both database clusters were configured with **RAM-backed storage** to isolate architectural differences from storage medium effects.
