@@ -1,5 +1,7 @@
 # API Reference
 
+> **Note:** The API is an **initial prototype** that was later abandoned during load testing. At loads above 1,000 concurrent threads, the API became a bottleneck, leaving database resources underutilised. The final load tests use **direct database access via JMeter Groovy scripts** for both systems.
+
 ## Base URL
 
 - **Local Development:** `http://localhost:5119`
@@ -316,12 +318,10 @@ Get product by ID.
 
 Prometheus metrics endpoint. Returns metrics in Prometheus text format.
 
-**Metrics Exposed:**
+**Metrics Exposed (API prototype):**
 - `cart_repository_requests_total{operation}` - Total requests by operation
 - `cart_repository_operation_duration_seconds{operation,quantile}` - Operation latency
 - `cart_repository_errors_total{operation,error_type}` - Error counts
-- `cart_repository_active_operations{operation}` - Current concurrent operations
-- `cart_repository_rows_affected{operation}` - Rows affected histogram
 
 ### GET /swagger
 
@@ -360,3 +360,12 @@ All endpoints may return the following error responses:
   "status": 500
 }
 ```
+
+---
+
+## Load Testing Scripts
+
+The actual load testing was performed using **JMeter Groovy scripts** with direct database access. See:
+
+- `load-testing/test-plans/` - JMeter test plans (.jmx)
+- `load-testing/scripts/` - Groovy scripts for Redis and PostgreSQL

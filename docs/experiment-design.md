@@ -2,136 +2,112 @@
 
 ## Research Question
 
-**How does horizontal sharding using Citus affect the performance and behavior of a multi-tenant e-commerce shopping cart system?**
+> **Does Redis Cluster's performance advantage over PostgreSQL persist when both systems operate under identical in-memory conditions, and what are the architectural reasons for any observed differences?**
 
 ## Objectives
 
-1. Evaluate the performance impact of different sharding strategies
-2. Compare entity-based vs tenant-based sharding approaches
-3. Analyze latency, throughput, and error rates under load
-4. Measure the effectiveness of data co-location in multi-tenant scenarios
+1. Compare horizontal sharding performance between Redis Cluster and PostgreSQL + Citus
+2. Measure throughput, latency, and error rates under controlled load
+3. Identify the saturation point and breaking point for each system
+4. Analyze architectural reasons for performance differences
 
-## Sharding Strategies Compared
+## Hypothesis
 
-### Strategy A: Entity-Based Sharding
+- Redis Cluster will outperform PostgreSQL even under identical RAM conditions
+- The advantage is **architectural**, not storage-related
+- PostgreSQL will show more predictable behavior but lower peak throughput
+- Both systems will show similar latency at low loads
 
-Each table distributed by its own primary key:
+## Test Environment
 
-| Table | Shard Key |
-|-------|-----------|
-| users | user_id |
-| products | product_id |
-| cart | user_id |
+Both systems were configured with **identical RAM-backed storage** to isolate architectural differences from storage medium effects.
 
-**Hypothesis:** Simple but may cause cross-shard queries for multi-tenant operations.
+## Load Testing Configuration
 
-### Strategy B: Tenant-Based Sharding
+### Test Scenario (per virtual user)
 
-All tables distributed by `tenant_id`:
+Each virtual user executes a fixed shopping cart sequence:
 
-| Table | Shard Key |
-|-------|-----------|
-| users | tenant_id |
-| products | tenant_id |
-| cart | tenant_id |
+1. **Create cart** - Initialise a new shopping cart
+2. **Add item** - Add first product to cart
+3. **Add second item** - Add another product
+4. **Update item quantity** - Modify quantity of first item
+5. **Remove item** - Delete second item from cart
+6. **View cart** - Retrieve full cart contents with product details
+7. **Checkout (delete cart)** - Complete the session
 
-**Hypothesis:** Better co-location but requires composite keys and may cause hot spots for active tenants.
+### Load Stages
 
-## Test Scenarios
-
-### Load Test Configuration
-
-| Thread Group | Operation | Threads | Ramp-up | Duration |
-|--------------|-----------|---------|---------|----------|
-| TG01 | GET cart | 30 | 10s | 300s |
-| TG02 | Add item to cart | 10 | 5s | 300s |
-| TG03 | Update item quantity | 5 | 5s | 300s |
-| TG04 | Update cart discount | 3 | 5s | 300s |
-| TG05 | Remove item from cart | 2 | 5s | 300s |
+| Stage | Concurrent Users | Duration | Purpose |
+|-------|-----------------|----------|---------|
+| 1 | 200 | 5 min | Baseline stability |
+| 2 | 500 | 5 min | Normal operating conditions |
+| 3 | 1,000 | 10 min | Throughput growth observation |
+| 4 | 2,000 | 10 min | Saturation point detection |
+| 5 | 5,000 | 10 min | Breaking point identification |
+| 6 | 500 | 5 min | Post-stress recovery verification |
 
 ### Metrics Collected
 
-1. **Response Time**
-   - Mean, median, p90, p95, p99
-   - Min/max response times
+| Metric | Description |
+|--------|-------------|
+| Total requests processed | Cumulative request count |
+| Average throughput | Requests per second (req/s) |
+| Peak throughput | Maximum observed req/s |
+| Latency (p50, p90, p95, p99) | Response time percentiles |
+| Saturation point | Concurrency level where throughput peaks |
+| Error rate | Failed requests as percentage |
+| Data integrity | ACID (PostgreSQL) vs BASE (Redis) |
 
-2. **Throughput**
-   - Requests per second
-   - Transactions per second
+## Infrastructure
 
-3. **Error Rate**
-   - Failed requests
-   - Timeout rate
+| Component | Specification |
+|-----------|---------------|
+| VM | OpenNebula (Vilnius University MIF) |
+| CPU | 2 vCPU |
+| RAM | 10 GB |
+| Disk | 100 GB |
+| OS | Ubuntu 24.04 LTS |
 
-4. **Database Metrics**
-   - Query latency (from Prometheus)
-   - Active connections
-   - Shard distribution
+### PostgreSQL + Citus Configuration
 
-## Test Data
+- **Coordinator:** 1 node (port 55432)
+- **Workers:** 2 nodes (ports 55433-55434)
+- **Storage:** tmpfs (RAM-backed)
+- **Tables:** UNLOGGED for additional performance
+- **Settings:** `fsync=off`, `synchronous_commit=off`, `full_page_writes=off`
 
-### Scale
+### Redis Cluster Configuration
 
-- **Tenants:** 100
-- **Users per tenant:** 1000
-- **Products per tenant:** 10000
-- **Cart items:** Variable (depends on user activity)
+- **Nodes:** 6 (ports 7001-7006)
+- **Topology:** 3 primary + 3 replica
+- **Sharding:** Hash-slot based (16,384 slots)
+- **Storage:** RAM only (appendonly disabled)
 
-### Distribution
+## Key Findings
 
-- Uniform distribution across tenants
-- Zipfian distribution for product popularity
-- Random cart sizes (1-20 items)
-
-## Experimental Setup
-
-### Infrastructure
-
-- **Citus Cluster:** 1 coordinator + 2 workers
-- **Storage:** tmpfs (in-memory) for controlled performance
-- **Network:** localhost for local tests, SSH tunnel for remote
-
-### Configuration Parameters
-
-```yaml
-# PostgreSQL/Citus
-max_connections: 300
-shared_buffers: 1GB (coordinator), 768MB (workers)
-work_mem: 2MB
-fsync: off
-synchronous_commit: off
-full_page_writes: off
-
-# Application
-Maximum Pool Size: 200
-Timeout: 90s
-Command Timeout: 90s
-```
-
-## Expected Outcomes
-
-1. Tenant-based sharding should show lower latency for tenant-scoped queries
-2. Entity-based sharding may show better scalability for single-entity operations
-3. Co-location benefits should increase with query complexity
-4. Connection pooling effectiveness varies with shard key selection
+1. **Redis achieved ~3x higher throughput** than PostgreSQL even under identical RAM conditions
+2. **PostgreSQL throughput actively degrades** past saturation due to `fork()` process contention
+3. **At low loads (<500 users)** both systems show identical ~30ms latency
+4. **Redis error rate of 1.53%** makes it unsuitable as sole store for checkout operations
 
 ## Threats to Validity
 
 ### Internal Validity
 
-- SSH tunnel introduces additional network latency (controlled for in remote tests)
-- tmpfs storage may not reflect production disk I/O characteristics
-- Test data distribution may not match real-world patterns
+- Single VM environment may not reflect production distributed infrastructure
+- RAM-backed storage removes I/O as a realistic bottleneck
+- Test data distribution (uniform/Zipfian) may not match all real-world patterns
 
 ### External Validity
 
-- Single Citus cluster (3 nodes) may not represent larger deployments
-- In-memory storage removes I/O as a bottleneck
-- Single-region deployment ignores geo-distribution effects
+- Single-region deployment (Lithuania) ignores geo-distribution effects
+- Two-worker Citus cluster may behave differently at larger scales
+- Six-node Redis cluster vs production deployments with more nodes
 
 ## Future Work
 
-- Test with larger cluster sizes (5+ workers)
+- Test with larger cluster sizes (5+ Citus workers, 9+ Redis nodes)
 - Add geo-distributed multi-region tests
 - Compare with other sharding solutions (CockroachDB, TiDB)
-- Measure impact of reference table replication
+- Measure impact of different sharding keys

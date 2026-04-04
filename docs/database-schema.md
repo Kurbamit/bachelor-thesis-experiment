@@ -1,19 +1,25 @@
 # Database Schema
 
-## Citus Distribution
+## Data Model
 
-Citus extends PostgreSQL to support horizontal sharding. Tables can be distributed across worker nodes using a shard key.
+The experiment uses a multi-tenant e-commerce shopping cart model with 7 entities:
 
-## Schema: Tenant-Based Sharding
+- **tenants** – top-level entity representing individual stores
+- **users** – buyers belonging to a tenant
+- **products** – product catalogue scoped to tenant
+- **product_variants** – product variants (size, color) scoped to tenant
+- **discounts** – tenant-scoped discount codes
+- **carts** – active user sessions
+- **cart_items** – join table linking carts to products
 
-This is the recommended sharding strategy for multi-tenant applications. All tenant-scoped data is distributed by `tenant_id` for optimal co-location.
+## PostgreSQL + Citus Schema
 
 ### Reference Tables
 
 Reference tables are small, global tables that are replicated to all workers:
 
 ```sql
--- Tenants table (reference table)
+-- Tenants table (reference table - replicated to all workers)
 CREATE TABLE public.tenants (
   tenant_id   uuid PRIMARY KEY,
   name        text NOT NULL,
@@ -25,7 +31,7 @@ SELECT create_reference_table('public.tenants');
 
 ### Distributed Tables
 
-Distributed tables are sharded across workers by their shard key:
+All tenant-scoped tables are distributed by `tenant_id` for optimal co-location:
 
 ```sql
 -- Users (belongs to tenant)
@@ -54,96 +60,119 @@ CREATE TABLE public.products (
     FOREIGN KEY (tenant_id) REFERENCES public.tenants(tenant_id) ON DELETE CASCADE
 );
 
--- Cart (belongs to user in tenant)
-CREATE TABLE public.cart (
-  tenant_id   uuid NOT NULL,
-  user_id     uuid NOT NULL,
-  product_id  uuid NOT NULL,
-  quantity    int NOT NULL CHECK (quantity > 0),
-  added       timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (tenant_id, user_id, product_id),
-
-  CONSTRAINT fk_cart_user
-    FOREIGN KEY (tenant_id, user_id)
-    REFERENCES public.users(tenant_id, user_id)
-    ON DELETE CASCADE,
-
-  CONSTRAINT fk_cart_product
+-- Product variants (size, color, etc.)
+CREATE TABLE public.product_variants (
+  tenant_id       uuid NOT NULL,
+  variant_id      uuid NOT NULL,
+  product_id      uuid NOT NULL,
+  sku             text NOT NULL,
+  attributes       jsonb NOT NULL DEFAULT '{}',
+  priceModifier    numeric(12,2) NOT NULL DEFAULT 0,
+  PRIMARY KEY (tenant_id, variant_id),
+  CONSTRAINT fk_variant_product
     FOREIGN KEY (tenant_id, product_id)
-    REFERENCES public.products(tenant_id, product_id)
-    ON DELETE RESTRICT
+    REFERENCES public.products(tenant_id, product_id) ON DELETE CASCADE
 );
 
-CREATE INDEX ix_cart_tenant_user_added
-  ON public.cart (tenant_id, user_id, added DESC);
+-- Discounts (tenant-scoped)
+CREATE TABLE public.discounts (
+  tenant_id    uuid NOT NULL,
+  discount_id  uuid NOT NULL,
+  code         text NOT NULL,
+  type         text NOT NULL CHECK (type IN ('percentage', 'fixed')),
+  value        numeric(12,2) NOT NULL,
+  min_quantity int,
+  expires_at   timestamptz,
+  PRIMARY KEY (tenant_id, discount_id),
+  UNIQUE (tenant_id, code),
+  CONSTRAINT fk_discounts_tenant
+    FOREIGN KEY (tenant_id) REFERENCES public.tenants(tenant_id) ON DELETE CASCADE
+);
 
--- Distribution
+-- Carts (active user sessions)
+CREATE TABLE public.carts (
+  tenant_id    uuid NOT NULL,
+  cart_id      uuid NOT NULL,
+  user_id      uuid NOT NULL,
+  discount_id  uuid,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, cart_id),
+  CONSTRAINT fk_carts_user
+    FOREIGN KEY (tenant_id, user_id)
+    REFERENCES public.users(tenant_id, user_id) ON DELETE CASCADE,
+  CONSTRAINT fk_carts_discount
+    FOREIGN KEY (tenant_id, discount_id)
+    REFERENCES public.discounts(tenant_id, discount_id) ON DELETE SET NULL
+);
+
+-- Cart items (join table)
+CREATE TABLE public.cart_items (
+  tenant_id    uuid NOT NULL,
+  cart_item_id uuid NOT NULL,
+  cart_id      uuid NOT NULL,
+  product_id   uuid NOT NULL,
+  variant_id   uuid,
+  quantity     int NOT NULL CHECK (quantity > 0),
+  added_at     timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (tenant_id, cart_item_id),
+  CONSTRAINT fk_cart_items_cart
+    FOREIGN KEY (tenant_id, cart_id)
+    REFERENCES public.carts(tenant_id, cart_id) ON DELETE CASCADE,
+  CONSTRAINT fk_cart_items_product
+    FOREIGN KEY (tenant_id, product_id)
+    REFERENCES public.products(tenant_id, product_id) ON DELETE RESTRICT,
+  CONSTRAINT fk_cart_items_variant
+    FOREIGN KEY (tenant_id, variant_id)
+    REFERENCES public.product_variants(tenant_id, variant_id) ON DELETE SET NULL
+);
+
+CREATE INDEX idx_cart_items_cart_id ON public.cart_items (tenant_id, cart_id);
+CREATE INDEX idx_carts_user_id ON public.carts (tenant_id, user_id);
+```
+
+### Distribution
+
+```sql
+-- Reference table (replicated to all workers)
+SELECT create_reference_table('public.tenants');
+
+-- Distributed tables (hash-sharded by tenant_id)
 SELECT create_distributed_table('public.users', 'tenant_id');
 SELECT create_distributed_table('public.products', 'tenant_id');
-SELECT create_distributed_table('public.cart', 'tenant_id');
+SELECT create_distributed_table('public.product_variants', 'tenant_id');
+SELECT create_distributed_table('public.discounts', 'tenant_id');
+SELECT create_distributed_table('public.carts', 'tenant_id');
+SELECT create_distributed_table('public.cart_items', 'tenant_id');
 ```
 
-## Schema: Simple Sharding (Entity-Based)
+## Redis Data Model
 
-Alternative strategy where each table is distributed by its own primary key:
+In Redis, the full cart state is stored as a single JSON object per cart key:
 
-```sql
-CREATE EXTENSION IF NOT EXISTS citus;
-
-CREATE TABLE users (
-  user_id uuid PRIMARY KEY,
-  name text NOT NULL,
-  email text NOT NULL,
-  register_date timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TABLE products (
-  product_id uuid PRIMARY KEY,
-  name text NOT NULL,
-  price numeric(12,2) NOT NULL CHECK (price >= 0),
-  category text NOT NULL
-);
-
-CREATE TABLE cart (
-  user_id uuid NOT NULL,
-  product_id uuid NOT NULL,
-  quantity int NOT NULL CHECK (quantity > 0),
-  added timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (user_id, product_id)
-);
-
--- Distribution by entity ID
-SELECT create_distributed_table('users', 'user_id');
-SELECT create_distributed_table('products', 'product_id');
-SELECT create_distributed_table('cart', 'user_id');
+```
+Key: cart:{cartId}
+Value: {
+  "tenantId": "uuid",
+  "userId": "uuid",
+  "discountId": "uuid|null",
+  "items": [
+    {
+      "productId": "uuid",
+      "variantId": "uuid|null",
+      "productName": "string",
+      "quantity": 2,
+      "price": 29.99
+    }
+  ],
+  "createdAt": "timestamp",
+  "updatedAt": "timestamp"
+}
 ```
 
-## Checking Shard Distribution
-
-Query to see how data is distributed across shards:
-
-```sql
--- Show shard information
-SELECT * FROM citus_shards;
-
--- Show table distribution
-SELECT logicalrelname, shardid, shardlength, citus_table_type
-FROM citus_shards
-WHERE logicalrelname IN ('users', 'products', 'cart');
-
--- Check which worker contains a specific tenant's data
-SELECT * FROM citus_shard_placements
-WHERE shardid IN (
-  SELECT shardid FROM citus_shards
-  WHERE logicalrelname = 'cart'
-  AND shardminvalue::uuid <= 'your-tenant-id'::uuid
-  AND shardmaxvalue::uuid >= 'your-tenant-id'::uuid
-);
-```
-
-## Data Generation
-
-See `database/migrations/` for test data generation scripts.
+**Key patterns:**
+- `cart:{cartId}` - Cart data
+- `cart:tenant:{tenantId}:user:{userId}` - Index of user's active cart
 
 ## Entity Relationship Diagram
 
@@ -158,20 +187,68 @@ See `database/migrations/` for test data generation scripts.
                       │ register_  │       │ category    │
                       │   date     │       │ created_at  │
                       └─────────────┘       └─────────────┘
-                             │                    ▲
-                             │ 1:N                │
-                             ▼                    │
+                             │                     ▲
+                             │ 1:N                 │
+                             ▼                     │
                       ┌─────────────┐              │
-                      │    cart     │──────────────┘
-                      │─────────────│
-                      │ tenant_id  │◄──────────┐
-                      │ user_id    │           │
-                      │ product_id │           │
-                      │ quantity   │           │
-                      │ added      │           │
-                      └─────────────┘           │
-                                               │
-                     ┌──────────────────────────┘
-                     │ FK: tenant_id, product_id
-                     │ RESTRICT (can't delete product with cart items)
+                      │    carts    │──────────────┘
+                      │─────────────│              │
+                      │ tenant_id  │◄──┐           │
+                      │ cart_id PK │   │           │
+                      │ user_id    │───┘           │
+                      │ discount_id│   │           │
+                      └─────────────┘   │           │
+                             │          │           │
+                             │ 1:N      │           │
+                             ▼          │           │
+                      ┌─────────────┐   │           │
+                      │ cart_items  │───┘           │
+                      │─────────────│               │
+                      │ cart_item_id│◄───────────────┘
+                      │ product_id │ (RESTRICT)
+                      │ variant_id │
+                      │ quantity   │
+                      └─────────────┘
+
+┌─────────────────┐       ┌─────────────┐
+│    discounts    │       │product_variants
+│─────────────────│       │─────────────│
+│ tenant_id PK   │◄──────│ tenant_id  │
+│ discount_id PK │  1:N  │ variant_id │
+│ code           │       │ product_id │
+│ type           │       │ sku        │
+│ value          │       │ attributes │
+└─────────────────┘       └─────────────┘
 ```
+
+## Checking Shard Distribution (PostgreSQL/Citus)
+
+```sql
+-- Show all shards
+SELECT * FROM citus_shards;
+
+-- Show table distribution
+SELECT logicalrelname, shardid, shardlength, citus_table_type
+FROM citus_shards
+WHERE logicalrelname IN ('users', 'products', 'carts', 'cart_items');
+
+-- Find which worker contains a specific tenant's data
+SELECT shardid, citus_table_type, nodeid, nodeName
+FROM citus_shard_placements
+WHERE shardid IN (
+  SELECT shardid FROM citus_shards
+  WHERE logicalrelname = 'carts'
+  AND shardminvalue::uuid <= 'your-tenant-id'::uuid
+  AND shardmaxvalue::uuid >= 'your-tenant-id'::uuid
+);
+```
+
+## Data Generation
+
+See `database/migrations/` for test data generation scripts.
+
+**Scale:**
+- 100 tenants
+- 1,000 users per tenant
+- 10,000 products per tenant
+- Variable cart items (1-20 per cart)
