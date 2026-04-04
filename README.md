@@ -1,13 +1,33 @@
-# Database Sharding Experiment for Multi-Tenant E-Commerce
+# Database Sharding Performance Comparison: Redis Cluster vs PostgreSQL (Citus)
 
-A bachelor's thesis experiment investigating the performance and behavior of a sharded PostgreSQL database using Citus as a backend for a multi-tenant e-commerce shopping cart system.
+A bachelor's thesis experiment comparing horizontal sharding performance between a key-value Redis Cluster and a relational PostgreSQL database with the Citus extension, in a multi-tenant e-commerce shopping cart scenario.
 
 ## Overview
 
-This experiment evaluates **horizontal sharding strategies** for multi-tenant e-commerce applications, specifically comparing:
+This experiment evaluates **horizontal sharding performance** under high-concurrency workloads, comparing:
 
-1. **Entity-based sharding** - Tables distributed by their own primary keys (e.g., `user_id`, `product_id`)
-2. **Tenant-based sharding** - All tenant-scoped data distributed by `tenant_id` for data co-location
+1. **Redis Cluster** – 6-node cluster (3 primary + 3 replica), hash-slot based sharding, in-memory storage
+2. **PostgreSQL + Citus** – 1 coordinator + 2 worker nodes, hash sharding by `tenant_id`, RAM-backed storage
+
+Both systems were configured to use **RAM storage** to isolate architectural differences from storage medium effects.
+
+## Research Question
+
+> Does Redis Cluster's performance advantage over PostgreSQL persist when both systems operate under identical in-memory conditions, and what are the architectural reasons for any observed differences?
+
+## Key Results
+
+| Metric | Redis Cluster | PostgreSQL (Citus) |
+|--------|--------------|-------------------|
+| Total requests processed | 6,722,964 | 2,275,603 |
+| Average throughput | 2,475.41 req/s | 841.60 req/s |
+| Peak throughput | ~3,600 req/s | ~1,000 req/s |
+| Saturation point | 2,000 concurrent users | 1,000 concurrent users |
+| Latency (low load) | ~30 ms | ~30 ms |
+| Latency (2,000 users) | 200 ms | 100 ms |
+| Latency (5,000 users) | 625 ms | 400 ms |
+| Error rate | 1.53% | 0% |
+| Data integrity | BASE (eventual consistency) | ACID (100% guaranteed) |
 
 ## Technology Stack
 
@@ -15,38 +35,40 @@ This experiment evaluates **horizontal sharding strategies** for multi-tenant e-
 |-----------|------------|
 | Language | C# (.NET 10) |
 | Framework | ASP.NET Core Web API |
-| Database | PostgreSQL with Citus extension |
-| ORM | Dapper (micro-ORM) |
-| Monitoring | Prometheus metrics |
-| Load Testing | Apache JMeter |
-| Containerization | Docker & Docker Compose |
+| Relational DB | PostgreSQL 16 + Citus 12.1 |
+| Key-Value DB | Redis 8.6 Cluster |
+| Load Testing | Apache JMeter 5.6.3 + Groovy (JSR223) |
+| Containerization | Docker 29.2.1 + Docker Compose |
+| Infrastructure | OpenNebula cloud (Vilnius University MIF) |
+
+> **Note:** A .NET API layer was prototyped initially but abandoned during testing – at loads above 1,000 concurrent threads the API became a bottleneck, leaving database resources underutilised. Final tests use **direct database access via JMeter Groovy scripts** for both systems, ensuring a fair comparison.
 
 ## Project Structure
 
 ```
 eksperimentas/
-├── src/                    # Application source code
+├── src/                    # Application source code (initial API prototype)
 │   └── Api/               # ASP.NET Core Web API
 ├── database/              # Database schema and migrations
-│   ├── schema/           # DDL scripts for different sharding strategies
+│   ├── schema/            # DDL scripts (PostgreSQL + Citus distribution)
 │   ├── queries/           # Analytics and verification queries
-│   └── migrations/        # Test data generation
+│   └── migrations/        # Test data generation scripts
 ├── infrastructure/        # Infrastructure configuration
 │   ├── docker-compose.postgres.yml   # Citus cluster (1 coordinator + 2 workers)
-│   ├── docker-compose.redis.yml      # Redis cluster (6 nodes)
+│   ├── docker-compose.redis.yml      # Redis cluster (6 nodes: 3 primary + 3 replica)
 │   ├── docker-compose.api.yml        # API container
 │   └── prometheus.yml    # Prometheus scrape configuration
 ├── load-testing/          # JMeter load test configurations
-│   ├── test-plans/        # JMeter test plans (.jmx)
+│   ├── test-plans/        # JMeter test plans (.jmx) – direct DB access via Groovy
 │   ├── data/              # CSV test data
 │   ├── results/           # Test results (.jtl)
-│   └── scripts/           # Groovy scripts
+│   └── scripts/           # Groovy scripts for Redis and PostgreSQL
 └── docs/                  # Documentation
     ├── architecture.md
     ├── experiment-design.md
     ├── database-schema.md
     ├── api-reference.md
-    └── results/           # Experiment results (to be added)
+    └── results/           # Experiment results
 ```
 
 ## Quick Start
@@ -54,59 +76,102 @@ eksperimentas/
 ### Prerequisites
 
 - Docker & Docker Compose
-- .NET 10 SDK (for local development)
-- SSH access to remote database server (for remote deployment)
+- .NET 10 SDK (optional – only needed for API prototype)
 
-### Local Development
+### Start Infrastructure
 
 ```bash
-# Start infrastructure
+# Start PostgreSQL + Citus cluster
 cd infrastructure
 docker-compose -f docker-compose.postgres.yml up -d
 
-# Run the API
-cd src/Api
-dotnet run
+# Start Redis Cluster
+docker-compose -f docker-compose.redis.yml up -d
 ```
 
-The API will be available at `http://localhost:5119` with:
-- Swagger UI: `/swagger`
-- Prometheus metrics: `/metrics`
+### Initialise PostgreSQL Schema
 
-### Remote Deployment
-
-The API connects to a remote PostgreSQL server via SSH tunnel. Configure in `src/Api/appsettings.json`:
-
-```json
-{
-  "SshTunnel": {
-    "SshHost": "193.219.91.103",
-    "SshPort": 11200,
-    "SshUser": "your-user",
-    "LocalPort": 5433
-  }
-}
+```bash
+# Apply schema with Citus distribution
+psql -h localhost -p 55432 -U postgres -f database/schema/tenant_sharding.sql
 ```
 
-## Database Schema
-
-### Tenant-Based Sharding (Recommended)
-
-All tenant-scoped tables are distributed by `tenant_id` for optimal co-location:
+The schema distributes all tenant-scoped tables by `tenant_id`:
 
 ```sql
 -- Reference table (replicated to all nodes)
 SELECT create_reference_table('public.tenants');
 
--- Distributed tables (sharded by tenant_id)
+-- Distributed tables (hash-sharded by tenant_id)
 SELECT create_distributed_table('public.users', 'tenant_id');
 SELECT create_distributed_table('public.products', 'tenant_id');
-SELECT create_distributed_table('public.cart', 'tenant_id');
+SELECT create_distributed_table('public.product_variants', 'tenant_id');
+SELECT create_distributed_table('public.discounts', 'tenant_id');
+SELECT create_distributed_table('public.carts', 'tenant_id');
+SELECT create_distributed_table('public.cart_items', 'tenant_id');
 ```
 
-See [docs/database-schema.md](docs/database-schema.md) for full schema documentation.
+## Data Model
 
-## API Endpoints
+The experiment uses a multi-tenant e-commerce shopping cart model with 7 entities:
+
+- **tenants** – top-level entity representing individual stores
+- **users** – buyers belonging to a tenant
+- **products** + **product_variants** – product catalogue scoped to tenant
+- **discounts** – tenant-scoped discount codes
+- **carts** – active user sessions
+- **cart_items** – join table linking carts to products
+
+In Redis, the full cart state (items, quantities, product data) is stored as a single JSON object per cart key. In PostgreSQL, the same data is normalised across the relational schema above.
+
+## Load Testing
+
+Tests are run via **Apache JMeter with Groovy (JSR223 Sampler)**, connecting directly to both databases without an intermediary API layer. Groovy scripts are cached using JMeter's Compilation Cache to minimise tool-side overhead.
+
+### Test Scenario
+
+Each virtual user executes a fixed shopping cart sequence (based on average items per session):
+
+1. Create cart
+2. Add item
+3. Add second item
+4. Update item quantity
+5. Remove item
+6. View cart contents
+7. Checkout (delete cart)
+
+### Load Stages
+
+| Stage | Name | Concurrent Users | Duration | Purpose |
+|-------|------|-----------------|----------|---------|
+| 1 | Low load | 200 | 5 min | Baseline stability |
+| 2 | Medium load | 500 | 5 min | Normal operating conditions |
+| 3 | High load | 1,000 | 10 min | Throughput growth observation |
+| 4 | Very high load | 2,000 | 10 min | Saturation point detection |
+| 5 | Extreme (stress) | 5,000 | 10 min | Breaking point identification |
+| 6 | Recovery | 500 | 5 min | Post-stress recovery verification |
+
+```bash
+# Run PostgreSQL test plan
+jmeter -n -t load-testing/test-plans/postgres_cart_test.jmx -l load-testing/results/postgres.jtl
+
+# Run Redis test plan
+jmeter -n -t load-testing/test-plans/redis_cart_test.jmx -l load-testing/results/redis.jtl
+```
+
+## Infrastructure Details
+
+All experiments were run on a single virtual machine provided by Vilnius University MIF via OpenNebula:
+
+- **VM specs:** 2 CPU, 8 vCPU, 10 GB RAM, 100 GB Disk, Ubuntu 24.04 LTS
+- **Redis Cluster:** 6 nodes (ports 7001–7006), all data in RAM
+- **PostgreSQL (Citus):** 1 coordinator (port 55432) + 2 workers (ports 55433–55434), UNLOGGED tables in RAM
+
+Both systems were intentionally configured with RAM-backed storage to ensure the comparison reflects **architectural differences only**, not storage medium speed.
+
+## API Endpoints (Prototype)
+
+The initial API prototype (not used in final load tests) exposed the following endpoints:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -117,43 +182,16 @@ See [docs/database-schema.md](docs/database-schema.md) for full schema documenta
 | POST | `/api/Cart/{cartId}/items` | Add item to cart |
 | DELETE | `/api/Cart/items/{cartItemId}` | Remove item from cart |
 | PUT | `/api/Cart/items/{cartItemId}/quantity` | Update item quantity |
-| GET | `/api/tenant/{tenantId}/cart` | Get tenant's cart |
+| GET | `/api/tenant/{tenantId}/cart` | Get tenant carts |
 | GET | `/api/products/{productId}` | Get product by ID |
 
-See [docs/api-reference.md](docs/api-reference.md) for full API documentation.
+## Findings Summary
 
-## Load Testing
-
-JMeter test plans are located in `load-testing/test-plans/`. Key test scenarios:
-
-- **TG01**: GET cart (30 threads, read-heavy)
-- **TG02**: Add item to cart (10 threads)
-- **TG03**: Update item quantity (5 threads)
-- **TG04**: Update cart discount (3 threads)
-- **TG05**: Remove item from cart (2 threads)
-
-```bash
-# Run a test plan
-jmeter -n -t load-testing/test-plans/cart_api_load_test.jmx -l load-testing/results/results.jtl
-```
-
-## Monitoring
-
-Prometheus metrics are exposed at `/metrics`:
-
-- `cart_repository_requests_total` - Request count by operation
-- `cart_repository_operation_duration_seconds` - Latency percentiles (p50, p90, p95, p99)
-- `cart_repository_errors_total` - Error count by operation and type
-- `cart_repository_active_operations` - Current concurrent operations
-- `cart_repository_rows_affected` - Rows affected histogram
-
-## Experiment Documentation
-
-- [Architecture](docs/architecture.md) - System architecture and components
-- [Experiment Design](docs/experiment-design.md) - Research questions and methodology
-- [Database Schema](docs/database-schema.md) - Citus distribution and table structures
-- [API Reference](docs/api-reference.md) - Detailed API endpoint documentation
+- Redis Cluster achieved ~3x higher average throughput than PostgreSQL even under identical RAM conditions, confirming the advantage is **architectural**, not storage-related
+- PostgreSQL throughput does not merely stagnate at high load – it **actively degrades** past the saturation point due to `fork()` process contention
+- At low loads (< 500 concurrent users) both systems show **identical ~30 ms latency** – migration to Redis below this threshold provides no measurable user benefit
+- Redis error rate of 1.53% (~38 errors/sec at average throughput) makes it unsuitable as the sole store for checkout operations; ACID-critical paths should remain on PostgreSQL
 
 ## License
 
-This project is for academic research purposes as part of a bachelor's thesis.
+This project is for academic research purposes as part of a bachelor's thesis at Vilnius University, Faculty of Mathematics and Informatics.
