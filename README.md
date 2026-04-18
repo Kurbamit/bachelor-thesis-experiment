@@ -68,7 +68,6 @@ eksperimentas/
     ├── experiment-design.md
     ├── database-schema.md
     ├── api-reference.md
-    └── results/           # Experiment results
 ```
 
 ## Quick Start
